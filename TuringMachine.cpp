@@ -168,14 +168,32 @@ bool TuringMachine::run() {
                     
                 // determine l->r or r->l
                 if( ruleMatrix[i][4] == 'L' ) {      // Head move to Left
-                    right.top() = ruleMatrix[i][3];
-                    char tmp = left.top();
-                    left.pop();
+                    if(right.empty()) {
+                        right.push(ruleMatrix[i][3]);
+                    } else {
+                        right.top() = ruleMatrix[i][3];
+                    }
+                    char tmp;
+                    if(left.empty()) {
+                        tmp = 'B';
+                    } else {
+                        tmp = left.top();
+                        left.pop();
+                    }
                     right.push(tmp);
                 } else {    // Head move to Right, NOTE: no chekcing for == 'R' here! Can cause undefined behavior!
-                    left.top() = ruleMatrix[i][3];
-                    char tmp = right.top();
-                    right.pop();
+                    if(left.empty()) {
+                        left.push(ruleMatrix[i][3]);
+                    } else {
+                        left.top() = ruleMatrix[i][3];
+                    }
+                    char tmp;
+                    if(right.empty()) {
+                        tmp = 'B';
+                    } else {
+                        tmp = right.top();
+                        right.pop();
+                    }
                     left.push(tmp);
                 }
                 // pop and push the correct side

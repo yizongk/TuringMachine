@@ -93,10 +93,27 @@ bool TuringMachine::setRules(ifstream& in_file) {
     ruleMatrixRow = 0;
     string rules = "";
     string temp = "";
+    string validtemp = "";
 
-    for( ; getline(in_file,temp) ; ++ruleMatrixRow ) {        // 100, cuz why not, one line shouldn't be expected to be that long anyway from input file. 
-        temp += '\n';
-        rules += temp;
+    for( ; getline(in_file,temp) ; ) {        // 100, cuz why not, one line shouldn't be expected to be that long anyway from input file. 
+        validtemp.erase();
+        for (int i = 0; i < temp.length(); ++i ) {
+            if( temp[i] == '/' ) {
+                break;
+            }
+            if( temp[i] == ' ' ) {
+                continue;
+            }
+            validtemp+=temp[i];
+        }
+
+        if( validtemp.length() != 5 ) {
+            cout << temp << "\n\tCorrupted line... not counted in rules\n\t validtemp:'" << validtemp << "'" << endl;
+        } else {
+            validtemp += '\n';
+            rules += validtemp;
+            ++ruleMatrixRow;
+        }
     }
     /* cout << "Here's the rules:\n'" << rules << "'" << endl;
     cout << "Number of line:" << ruleMatrixRow << endl; */
@@ -141,16 +158,15 @@ bool TuringMachine::setTape(string input) {
     return true;
 }
 
+/* MUST CONSOLT ERIC, for input 00001 and 0, prety much anything that starts with 0, gets accepted. and if I think of my 
+ * tape as begining with all 'B', and following the input state transistion, it make sense. row 1 to row 3
+ *  */
 bool TuringMachine::run() {
     cur_state = '0';  /* Make sure startin state matches what is giving in the file */
 
     char cur_symbol = 0;
 
-    do {
-        cout << "Tape:";
-        printTape();
-        cout << endl;
-
+    while(cur_symbol != 'f') {
         if(right.empty()) {
             cur_symbol = 'B';
         } else {
@@ -159,6 +175,10 @@ bool TuringMachine::run() {
 
         int i = 0;
         for(; i < ruleMatrixRow; ++i) {
+            cout << "Tape:";
+            printTape();
+            cout << endl;
+
             if( cur_state == ruleMatrix[i][0] && cur_symbol == ruleMatrix[i][1] ) { 
                 // set new state
                 cur_state = ruleMatrix[i][2];
@@ -168,7 +188,7 @@ bool TuringMachine::run() {
                     
                 // determine l->r or r->l
                 if( ruleMatrix[i][4] == 'L' ) {      // Head move to Left
-                    if(right.empty()) {
+                    if(right.empty()) {                 // if right is empty, you can access its top elment, but will seg fault.
                         right.push(ruleMatrix[i][3]);
                     } else {
                         right.top() = ruleMatrix[i][3];
@@ -205,9 +225,9 @@ bool TuringMachine::run() {
             return false;
         }
 
-    } while( true );
+    }
 
-    return false;
+    return true;
 }
 
 int main(int argc, char** argv) {

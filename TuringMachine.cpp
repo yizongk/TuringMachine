@@ -30,40 +30,40 @@ class TuringMachine {
 
 TuringMachine::TuringMachine() {
     //soemthing 
-    ruleMatrixRow = 0;
-    cur_state = '0';
+    this->ruleMatrixRow = 0;
+    this->cur_state = '0';
 }
 
 TuringMachine::~TuringMachine() {
-    clearRule();
+    this->clearRule();
 }
 
 bool TuringMachine::clearTape() {
-  while( !left.empty() ) {
-      left.pop();
+  while( !this->left.empty() ) {
+      this->left.pop();
   }
-  while( !right.empty() ) {
-      right.pop();
+  while( !this->right.empty() ) {
+      this->right.pop();
   }
   return true;
 }
 
 bool TuringMachine::clearRule() {
-    for (int i = 0; i < ruleMatrixRow; ++i)
-        delete [] ruleMatrix;
-    delete [] ruleMatrix;
+    for (int i = 0; i < this->ruleMatrixRow; ++i)
+        delete [] this->ruleMatrix;
+    delete [] this->ruleMatrix;
 
     return true;
 }
 
 bool TuringMachine::printTape() {
-    stack<char> left_cpy(left);
+    stack<char> left_cpy(this->left);
     stack<char> left_upside_down;
     while( !left_cpy.empty() ) {
         left_upside_down.push(left_cpy.top());
         left_cpy.pop();
     }
-    stack<char> right_cpy(right);
+    stack<char> right_cpy(this->right);
 
     while( !left_upside_down.empty() ) {
         cout << left_upside_down.top();
@@ -78,10 +78,10 @@ bool TuringMachine::printTape() {
 }
 
 void TuringMachine::printRule() {
-    for(int i = 0; i < ruleMatrixRow; ++i) {
+    for(int i = 0; i < this->ruleMatrixRow; ++i) {
         cout << "\t[" << i << "]:";
         for(int j =0; j < 5; ++j) {
-            cout << ruleMatrix[i][j];
+            cout << this->ruleMatrix[i][j];
         }
         cout << endl;
     }
@@ -90,7 +90,7 @@ void TuringMachine::printRule() {
 }
 
 bool TuringMachine::setRules(ifstream& in_file) {
-    ruleMatrixRow = 0;
+    this->ruleMatrixRow = 0;
     string rules = "";
     string temp = "";
     string validtemp = "";
@@ -108,24 +108,26 @@ bool TuringMachine::setRules(ifstream& in_file) {
         }
 
         if( validtemp.length() != 5 ) {
-            cout << temp << "\n\tCorrupted line... not counted in rules\n\t validtemp:'" << validtemp << "'" << endl;
+            cout << "\t > Unrecognized string... Ignoring: '" << temp << "'";
+            //cout << "\n\t validtemp:'" << validtemp << "'";
+            cout << endl;
         } else {
             validtemp += '\n';
             rules += validtemp;
-            ++ruleMatrixRow;
+            ++this->ruleMatrixRow;
         }
     }
     /* cout << "Here's the rules:\n'" << rules << "'" << endl;
     cout << "Number of line:" << ruleMatrixRow << endl; */
 
 
-    ruleMatrix = new char*[ruleMatrixRow];
-    for(int i = 0; i < ruleMatrixRow; ++i) {
-        ruleMatrix[i] = new char[5];
+    ruleMatrix = new char*[this->ruleMatrixRow];
+    for(int i = 0; i < this->ruleMatrixRow; ++i) {
+        this->ruleMatrix[i] = new char[5];
     }
 
     string::iterator it = rules.begin();
-    for( int i = 0; i < ruleMatrixRow; ++i ) {
+    for( int i = 0; i < this->ruleMatrixRow; ++i ) {
         for( int j = 0; it != rules.end(); ++it ) {
             if(*it == ' ') {
                 continue;
@@ -134,7 +136,7 @@ bool TuringMachine::setRules(ifstream& in_file) {
                 ++it;
                 break;
             }
-            ruleMatrix[i][j] = *it;
+            this->ruleMatrix[i][j] = *it;
             ++j;
         }
     }
@@ -144,7 +146,7 @@ bool TuringMachine::setRules(ifstream& in_file) {
 
 /* input can be size 0, some langauges can accept the empty string. */
 bool TuringMachine::setTape(string input) {
-    clearTape();
+    this->clearTape();
     if(input.length() == 0) {
         return true;
     }
@@ -152,7 +154,7 @@ bool TuringMachine::setTape(string input) {
     /* execute then check the condition */
     do {
         --it;
-        right.push(*it);
+        this->right.push(*it);
     } while( it != input.begin() );
 
     return true;
@@ -162,27 +164,27 @@ bool TuringMachine::setTape(string input) {
  * tape as begining with all 'B', and following the input state transistion, it make sense. row 1 to row 3
  *  */
 bool TuringMachine::run() {
-    cur_state = '0';  /* Make sure startin state matches what is giving in the file */
+    this->cur_state = '0';  /* Make sure startin state matches what is giving in the file */
 
     char cur_symbol = 0;
 
     while(cur_symbol != 'f') {
-        if(right.empty()) {
+        if(this->right.empty()) {
             cur_symbol = 'B';
         } else {
-            cur_symbol = right.top();
+            cur_symbol = this->right.top();
         }
 
         int i = 0;
-        for(; i < ruleMatrixRow; ++i) {
-            cout << "Tape:";
-            printTape();
+        for(; i < this->ruleMatrixRow; ++i) {
+            cout << "Tape:\t";
+            this->printTape();
             cout << endl;
 
-            if( cur_state == ruleMatrix[i][0] && cur_symbol == ruleMatrix[i][1] ) { 
+            if( this->cur_state == this->ruleMatrix[i][0] && cur_symbol == this->ruleMatrix[i][1] ) { 
                 // set new state
-                cur_state = ruleMatrix[i][2];
-                if(cur_state = 'f') {
+                this->cur_state = this->ruleMatrix[i][2];
+                if(this->cur_state == 'f') {
                     return true;
                 }
                     
@@ -244,18 +246,21 @@ int main(int argc, char** argv) {
     }
 
     TuringMachine TM;
-    cout << "This is a deterministic Turing Machine. It won't work if you put in a transition table that use non-detminism!" << endl;
+    cout << "___Turing Machine______________________________________________________________________________________________" << endl;
+    cout << "This is a deterministic Turing Machine. It won't work if you put in a transition table that use non-detminism!|" << endl;
+    cout << "______________________________________________________________________________________________________________|" << endl;
     /* Set the rule */
+    cout << "Loading in rule...\n" << endl;
     if( TM.setRules(in_file) ) {
-        cout << " * Rules loaded in successfully" << endl;
+        cout << "Rules loaded in successfully!\n" << endl;
     } 
-    cout << " * Here is the transition table" << endl;
+    cout << "Here is the transition table:\n" << endl;
     TM.printRule();
-
-    /* Get input string from keybaord */
-    cout << "you may now enter any string and we will test if it is in the language." << endl;
     cout << "(note: you may cause the Turing Machine to run forever if transition table describes a Recursively Enumerable Language)" << endl;
-    cout << "you maybe start typing in the string now, to quit, type in 'quit' without the single quote." << endl;
+    
+    /* Get input string from keybaord */
+    cout << "\nEnter any string and we will test if it is in the language." << endl;
+    cout << "To quit, type in 'quit' without the single quote." << endl;
     cout << "-----------------------------------------------------------------------------------------------------" << endl;
     cout << " > ";
     string input = "";
@@ -268,11 +273,14 @@ int main(int argc, char** argv) {
         /* Test input string base on rules */
         if( TM.run() ) {
             // string is indeed in language.
+            cout << "______________" << endl;
             cout << "YEP!" << endl;
         } else {
+            cout << "______________" << endl;
             cout <<"NOPE!" << endl;
         }
 
+        cout << endl << endl;
         cout << " > ";
     }
     

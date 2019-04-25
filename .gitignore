@@ -1,2 +1,3 @@
 TuringEmulator
+*.o
 .vscode

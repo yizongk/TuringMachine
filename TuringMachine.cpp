@@ -78,6 +78,11 @@ bool TuringMachine::printTape() {
 }
 
 void TuringMachine::printRule() {
+    if( this->ruleMatrixRow == 0 ) {
+        cout << "WARNING: Empty Rules Table!" << endl;
+        return;
+    }
+    
     for(int i = 0; i < this->ruleMatrixRow; ++i) {
         cout << "\t[" << i << "]:";
         for(int j =0; j < 5; ++j) {
@@ -94,6 +99,7 @@ bool TuringMachine::setRules(ifstream& in_file) {
     string rules = "";
     string temp = "";
     string validtemp = "";
+    bool error = false;
 
     for( ; getline(in_file,temp) ; ) {        // 100, cuz why not, one line shouldn't be expected to be that long anyway from input file. 
         validtemp.erase();
@@ -101,7 +107,7 @@ bool TuringMachine::setRules(ifstream& in_file) {
             if( temp[i] == '/' ) {
                 break;
             }
-            if( temp[i] == ' ' ) {
+            if( temp[i] == ' ' || temp[i] == '\r' || temp[i] == '\t' ) {
                 continue;
             }
             validtemp+=temp[i];
@@ -111,6 +117,7 @@ bool TuringMachine::setRules(ifstream& in_file) {
             cout << "\t > Unrecognized string... Ignoring: '" << temp << "'";
             //cout << "\n\t validtemp:'" << validtemp << "'";
             cout << endl;
+            error = true;
         } else {
             validtemp += '\n';
             rules += validtemp;
@@ -141,7 +148,7 @@ bool TuringMachine::setRules(ifstream& in_file) {
         }
     }
 
-    return true;
+    return !error;
 }
 
 /* input can be size 0, some langauges can accept the empty string. */
@@ -177,24 +184,27 @@ bool TuringMachine::run() {
 
         int i = 0;
         for(; i < this->ruleMatrixRow; ++i) {
-            cout << "Tape:\t";
-            this->printTape();
-            cout << endl;
-
+            
+            // If current state and current symbol is found on an instnace in the transition table, do something then break overhead loop.
             if( this->cur_state == this->ruleMatrix[i][0] && cur_symbol == this->ruleMatrix[i][1] ) { 
+                cout << "Tape:\t";
+                this->printTape();
+                cout << endl;
+    
                 // set new state
                 this->cur_state = this->ruleMatrix[i][2];
                 if(this->cur_state == 'f') {
                     return true;
                 }
+                // set new tape symbol (modifying top of right stack)
+                if( right.empty() ) {               // if right is empty, you can access its top elment, but will seg fault.
+                    right.push(ruleMatrix[i][3]);
+                } else {
+                    right.top() = ruleMatrix[i][3];
+                }
                     
-                // determine l->r or r->l
+                // determine l->r or r->l, and shift stuff between the two stack
                 if( ruleMatrix[i][4] == 'L' ) {      // Head move to Left
-                    if(right.empty()) {                 // if right is empty, you can access its top elment, but will seg fault.
-                        right.push(ruleMatrix[i][3]);
-                    } else {
-                        right.top() = ruleMatrix[i][3];
-                    }
                     char tmp;
                     if(left.empty()) {
                         tmp = 'B';
@@ -204,11 +214,6 @@ bool TuringMachine::run() {
                     }
                     right.push(tmp);
                 } else {    // Head move to Right, NOTE: no chekcing for == 'R' here! Can cause undefined behavior!
-                    if(left.empty()) {
-                        left.push(ruleMatrix[i][3]);
-                    } else {
-                        left.top() = ruleMatrix[i][3];
-                    }
                     char tmp;
                     if(right.empty()) {
                         tmp = 'B';
@@ -253,7 +258,9 @@ int main(int argc, char** argv) {
     cout << "Loading in rule...\n" << endl;
     if( TM.setRules(in_file) ) {
         cout << "Rules loaded in successfully!\n" << endl;
-    } 
+    } else {
+        cout << "Some rules may not have loaded in successfully (Input file with comments or junks can cause this)" << endl;
+    }
     cout << "Here is the transition table:\n" << endl;
     TM.printRule();
     cout << "(note: you may cause the Turing Machine to run forever if transition table describes a Recursively Enumerable Language)" << endl;

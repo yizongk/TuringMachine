@@ -69,12 +69,13 @@ bool TuringMachine::printTape() {
         cout << left_upside_down.top();
         left_upside_down.pop();
     }
-    cout << "H";
+    cout << "H("<< this->cur_state <<")";
     while( !right_cpy.empty() ) {
         cout << right_cpy.top();
         right_cpy.pop();
     }
 
+    return true;
 }
 
 void TuringMachine::printRule() {

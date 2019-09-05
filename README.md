@@ -7,7 +7,7 @@
 
 # How to run
 ```cpp
-g++ - test TuringMachine.cpp
+g++ -o test TuringMachine.cpp
 ./test input.txt
 ```
 

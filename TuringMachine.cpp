@@ -50,7 +50,7 @@ bool TuringMachine::clearTape() {
 
 bool TuringMachine::clearRule() {
     for (int i = 0; i < this->ruleMatrixRow; ++i)
-        delete [] this->ruleMatrix;
+        delete [] this->ruleMatrix[i];
     delete [] this->ruleMatrix;
 
     return true;

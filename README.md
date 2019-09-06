@@ -11,11 +11,20 @@ g++ -o test TuringMachine.cpp
 ./test input.txt
 ```
 
-# Transition input text file format
-* each line must contain exactly 5 non-space char
+# The format for an input file (Your Transition Table)
+*There are a few sample input files under TransitionTableExamples/, check them out!*
+* It must be a plain text file!
+* each line must contain exactly 5 non-space char, each of those char are separated by a space
     - Line 1: "a b c d e"
     - Line 2: "a b c d e"
     - etc...
+    
+    So the file will be something like:
+```
+    0 0 1 1 R
+    0 0 1 1 R
+    0 0 1 1 R
+```
 * a is the current state
     - initial state must be '0'
 * b is read_symbol  (Any non-space character)
